@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+			<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Anton|Audiowide" rel="stylesheet">
+
+			<!-- Font Awesome-->
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+				<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<title>Calculator</title>
+
+		<style>
+
+			body {
+
+				background-color: white; 
+
+			}
+
+			#mainSection {
+
+				border: 10px solid #404040;
+				border-radius: 15px;
+				text-align: center;
+				position: relative;
+				
+				top: 50px;
+				width: 500px;
+				height: 600px;
+				background-color: #483D8B;
+				background: linear-gradient(#483D8B, #404040); /* Standard syntax (must be last) */
+				padding: 30px;
+
+				font-family: 'Anton', sans-serif;
+				font-size: 20px;
+			}
+
+			#outputField {
+
+				border: 4px solid #00FF00;
+				text-align: right;
+				
+				background-color: #32CD32;
+				width: 350px;
+				height: 80px;
+				margin: 40px 10px 10px 10px;
+
+			}
+
+			td {
+
+				max-width: 300px;
+				overflow: hidden;
+    			text-overflow: ellipsis;
+    			white-space: nowrap;
+
+			}
+
+			.normalButton {
+
+				width: 60px;
+				height: 60px;
+				margin: 10px;
+				border-radius: 5px;
+
+			}
+
+
+			.redBtn {
+
+				background-color: red;
+				border-color: #800000;
+
+			}
+
+			.blueBtn {
+
+				background-color: #00BFFF;
+				border-color: #1E90FF;
+
+			}
+
+			.greenBtn {
+
+				background-color: green;
+				border-color: #228B22;
+			}
+
+			.yellowBtn {
+
+				background-color: #FFD700;
+				border-color: #DAA520;
+
+			}
+
+			#bigText {
+
+				font-size: 30px;
+				margin: 10px;
+				font-family: 'Audiowide', cursive;
+
+			}
+
+			#smallText {
+
+				font-size: 15px;
+				margin: 10px;
+				color: gray;
+				font-family: 'Audiowide', cursive;
+
+			}
+
+			.xFont {
+
+				font-family: 'Audiowide', cursive;
+
+			}
+
+		</style>
+
+	</head>
+
+	<body>
+
+		<div id="mainSection" class ="container-fluid">
+
+			<center>
+
+				<table id="outputField">
+					<tr><td><span id= "bigText"></span></td></tr>
+					<tr><td><span id= "smallText"></span></td></tr>
+				</table>
+
+				<input type= "button" value= "AC" id = "AC" class= "normalButton redBtn"></input>
+				<input type= "button" value= "CE" id = "CE" class= "normalButton redBtn"></input>
+				<input type= "button" value= "/" id = "/" class= "normalButton blueBtn"></input>
+				<input type= "button" value= "X" id = "*" class= "normalButton blueBtn"></input>
+				<br>
+
+				<input type= "button" value= "7" id = "7" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "8" id = "8" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "9" id = "9" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "-" id = "-" class= "normalButton blueBtn"></input>
+				<br>
+				
+				<input type= "button" value= "4" id = "4" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "5" id = "5" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "6" id = "6" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "+" id = "+" class= "normalButton blueBtn"></input>
+				<br>
+				
+				<input type= "button" value= "1" id = "1" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "2" id = "2" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "3" id = "3" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "." id = "." class= "normalButton"></input>
+				<br>
+				
+				<input type= "button" value= "0" id = "0" class= "normalButton xFont yellowBtn"></input>
+				<input type= "button" value= "(" id = "(" class= "normalButton blueBtn"></input>
+				<input type= "button" value= ")" id = ")" class= "normalButton blueBtn"></input>
+				<input type= "button" value= "=" id = "=" class= "normalButton greenBtn"></input>
+				<br>
+
+			</center>	
+
+
+		</div> <!-- FLUID CONTAINER ENDS-->	
+
+	</body>
+
+	<script>
+
+
+			// nicknames
+		 	const numOut1 = document.getElementById("bigText");
+			const numOut2 = document.getElementById("smallText");
+
+			// lock "." to avoid "desimals of decimals"
+			var lockPoint = false; // default, false
+
+			// lock this ( and this ) to avoid weirdness
+			var lockSubs1 = false;
+			var lockSubs2 = true; 
+			var sub1in = false; // when ( is in, but not closed
+			var logicalIn = false; // when number + logical is in
+
+			// saves old content, to these:
+			let oldContent1;
+			let oldContent2;
+
+			function timeForAction(butID) { // event listener fires this
+
+				console.log("time for some action with value:",butID);
+
+
+				if (numOut1.innerHTML != ""){ // if not empty, lets save it
+
+					oldContent1 = numOut1.innerHTML;
+
+				} else {oldContent1 = ""}
+
+				if (numOut2.innerHTML != ""){ // if not empty, lets save it
+
+					oldContent2 = numOut2.innerHTML;
+
+				} else {oldContent2 = ""}
+
+				// if old content is 0 or ".", lets clean it:
+				if (oldContent1 == "0" || oldContent2 == ".") {oldContent1 = "";}
+				if (oldContent2 == "0" || oldContent2 == ".") {oldContent2 = "";}
+
+				switch (butID) {  // check what was button pressed
+
+					case "0":  // number cases
+					case "1":
+					case "2":
+					case "3":
+					case "4":
+					case "5":
+					case "6":
+					case "7":
+					case "8":
+					case "9":
+
+						numOut1.innerHTML = oldContent1 + butID; // update text lines
+						numOut2.innerHTML = oldContent2 + butID;
+
+						lockSubs1 = true; // no ( anymore accepted
+
+						if (logicalIn === true && sub1in == true) {
+
+							lockSubs2 = false; // allow ) if so.
+
+						}
+
+						if (logicalIn = true && sub1in == false) {
+
+							lockSubs1 = false;
+
+						}	
+
+						console.log("number detected");
+
+					break;
+
+					case "AC": // delete all
+
+						numOut1.innerHTML = "0"; // update text lines
+						numOut2.innerHTML = "0";			
+						lockPoint = false; // release point key			
+
+					break;	
+
+					case "+":  // if button is one of these:
+					case "-":
+					case "/":
+					case "*":
+
+						// if first character is one of these already or ".", we replace the last one with this
+						if (oldContent1[oldContent1.length-1] == "+" ||
+							oldContent1[oldContent1.length-1] == "-" ||
+							oldContent1[oldContent1.length-1] == "/" ||
+							oldContent1[oldContent1.length-1] == "." ||
+							oldContent1[oldContent1.length-1] == "*") {
+
+							numOut1.innerHTML = oldContent1.replace(/.$/, butID);
+
+						} else {  // if last char is samething else
+
+							numOut1.innerHTML = oldContent1 + butID; // update text lines
+
+						} // else ends	
+
+						// if first character is one of these already or ".", we replace the last one with this
+						if (oldContent2[oldContent2.length-1] == "+" ||
+							oldContent2[oldContent2.length-1] == "-" ||
+							oldContent2[oldContent2.length-1] == "/" ||
+							oldContent2[oldContent2.length-1] == "." ||
+							oldContent2[oldContent2.length-1] == "*") {
+
+							numOut2.innerHTML = oldContent2.replace(/.$/, butID);
+
+						} else {  // if last char is samething else
+
+							numOut2.innerHTML = oldContent2 + butID; // update text lines
+
+						} // else ends
+
+						lockPoint = false;
+						logicalIn = true;
+
+						break;
+
+						case "CE":  // delete last char button
+
+							numOut1.innerHTML = oldContent1.replace(/.$/, "");
+							numOut2.innerHTML = oldContent2.replace(/.$/, "");							
+
+						break;
+
+						case ".":
+
+							if (lockPoint === false && oldContent1 != "") { // if point not locked
+							
+								// if first character is one of these already or ".", we replace the last one with this
+								if (oldContent1[oldContent1.length-1] == "+" ||
+									oldContent1[oldContent1.length-1] == "-" ||
+									oldContent1[oldContent1.length-1] == "/" ||
+									oldContent1[oldContent1.length-1] == "." ||
+									oldContent1[oldContent1.length-1] == "*") {
+
+									numOut1.innerHTML = oldContent1.replace(/.$/, butID);
+
+								} else {  // if last char is samething else
+
+									numOut1.innerHTML = oldContent1 + butID; // update text lines
+
+								} // else ends	
+
+								// if first character is one of these already or ".", we replace the last one with this
+								if (oldContent2[oldContent2.length-1] == "+" ||
+									oldContent2[oldContent2.length-1] == "-" ||
+									oldContent2[oldContent2.length-1] == "/" ||
+									oldContent2[oldContent2.length-1] == "." ||
+									oldContent2[oldContent2.length-1] == "*") {
+
+									numOut2.innerHTML = oldContent2.replace(/.$/, butID);
+
+								} else {  // if last char is samething else
+
+									numOut2.innerHTML = oldContent2 + butID; // update text lines
+
+								} // else ends
+
+								lockPoint = true; // lock the point to avoid "desimal of desimal"
+								lockSubs1 = true; // cant write ( right after dot.
+								lockSubs2 = true; // or )	
+
+							} // if point not locked ends
+
+						break;
+
+						case "(":  // sub1
+
+							console.log("(");
+
+							if (lockSubs1 === false) { // 
+
+								numOut1.innerHTML = oldContent1 + butID; // update text lines
+								numOut2.innerHTML = oldContent2 + butID;
+
+								sub1in = true; // unclosed ( is in
+							}
+
+						break;
+
+						case ")":  // sub1
+
+							console.log(")");
+
+							if (lockSubs2 === false) { // 
+
+								numOut1.innerHTML = oldContent1 + butID; // update text lines
+								numOut2.innerHTML = oldContent2 + butID;
+
+								sub1in = false; // closed ()
+								lockSubs2 = true; // no more
+								logicalIn = false;
+							}
+
+						break;
+
+						case "=":
+
+							if (oldContent1 != "") {
+
+							numOut1.innerHTML = eval(oldContent1);
+
+							} // if not empty
+
+						break;
+
+					default: console.log("not detected");
+
+				} // switch end
+
+
+			} // time for action ends
+
+			 $(document).ready(() => {
+
+				$(":button").click(function (event) {  // event listener for buttons.
+        		console.log("event listener for button activated");
+        	
+        		timeForAction(this.id); // fires timeForAction with id of button clicked.
+
+        		});
+
+			}) // on load ends
+
+	</script>
+
+</html>
